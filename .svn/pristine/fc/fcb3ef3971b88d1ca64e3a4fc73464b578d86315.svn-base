@@ -1,0 +1,128 @@
+﻿namespace PrinterServerApp
+{
+    partial class Form1
+    {
+        /// <summary>
+        ///  Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        ///  Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        ///  Required method for Designer support - do not modify
+        ///  the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            title = new Label();
+            Btn_label = new Label();
+            Stop_label = new Label();
+            Stop_btn = new Button();
+            Loading_img = new PictureBox();
+            ((System.ComponentModel.ISupportInitialize)Loading_img).BeginInit();
+            SuspendLayout();
+            // 
+            // title
+            // 
+            title.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
+            title.Font = new Font("Yu Gothic UI", 30F, FontStyle.Bold, GraphicsUnit.Point);
+            title.Location = new Point(7, 15);
+            title.Name = "title";
+            title.Size = new Size(785, 62);
+            title.TabIndex = 0;
+            title.Text = "自動帳票発行";
+            title.TextAlign = ContentAlignment.TopCenter;
+            // 
+            // Btn_label
+            // 
+            Btn_label.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
+            Btn_label.Font = new Font("Yu Gothic UI", 15F, FontStyle.Regular, GraphicsUnit.Point);
+            Btn_label.Location = new Point(248, 147);
+            Btn_label.Name = "Btn_label";
+            Btn_label.Size = new Size(299, 31);
+            Btn_label.TabIndex = 1;
+            Btn_label.Text = "自動帳票発行を停止しますか？";
+            Btn_label.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // Stop_label
+            // 
+            Stop_label.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
+            Stop_label.BackColor = Color.LimeGreen;
+            Stop_label.BorderStyle = BorderStyle.Fixed3D;
+            Stop_label.Font = new Font("Yu Gothic UI", 15F, FontStyle.Bold, GraphicsUnit.Point);
+            Stop_label.Location = new Point(334, 88);
+            Stop_label.MaximumSize = new Size(120, 35);
+            Stop_label.Name = "Stop_label";
+            Stop_label.Size = new Size(116, 35);
+            Stop_label.TabIndex = 2;
+            Stop_label.Text = "実行中・・・";
+            Stop_label.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // Stop_btn
+            // 
+            Stop_btn.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
+            Stop_btn.Cursor = Cursors.Hand;
+            Stop_btn.Font = new Font("Yu Gothic UI", 16F, FontStyle.Bold, GraphicsUnit.Point);
+            Stop_btn.Location = new Point(312, 191);
+            Stop_btn.MaximumSize = new Size(160, 60);
+            Stop_btn.Name = "Stop_btn";
+            Stop_btn.Size = new Size(160, 60);
+            Stop_btn.TabIndex = 3;
+            Stop_btn.Text = "停止";
+            Stop_btn.UseVisualStyleBackColor = true;
+            Stop_btn.Click += Stop_btn_Click;
+            // 
+            // Loading_img
+            // 
+            Loading_img.Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
+            Loading_img.Image = (Image)resources.GetObject("Loading_img.Image");
+            Loading_img.Location = new Point(334, 141);
+            Loading_img.MaximumSize = new Size(116, 110);
+            Loading_img.Name = "Loading_img";
+            Loading_img.Size = new Size(116, 110);
+            Loading_img.SizeMode = PictureBoxSizeMode.StretchImage;
+            Loading_img.TabIndex = 4;
+            Loading_img.TabStop = false;
+            Loading_img.Visible = false;
+            // 
+            // Form1
+            // 
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(800, 450);
+            Controls.Add(Loading_img);
+            Controls.Add(Stop_btn);
+            Controls.Add(Stop_label);
+            Controls.Add(Btn_label);
+            Controls.Add(title);
+            Icon = (Icon)resources.GetObject("$this.Icon");
+            Name = "Form1";
+            Text = "自動帳票発行";
+            ((System.ComponentModel.ISupportInitialize)Loading_img).EndInit();
+            ResumeLayout(false);
+        }
+
+        #endregion
+
+        private Label title;
+        private Label Btn_label;
+        private Label Stop_label;
+        private Button Stop_btn;
+        private PictureBox Loading_img;
+    }
+}

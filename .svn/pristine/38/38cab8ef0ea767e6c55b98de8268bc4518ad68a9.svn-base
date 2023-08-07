@@ -1,0 +1,25 @@
+using System.Runtime.CompilerServices;
+
+namespace PrinterServerApp
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void Stop_btn_Click(object sender, EventArgs e)
+        {
+            //Set end parameter
+            Program.EndProgram = true;
+
+            //Display loading
+            Loading_img.Visible = true;
+            Stop_label.Text = "í‚é~íÜÅEÅEÅE";
+            Stop_label.BackColor = Color.Orange;
+            Btn_label.Visible = false;
+            Stop_btn.Visible = false;
+        }
+    }
+}

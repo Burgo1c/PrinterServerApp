@@ -1,0 +1,416 @@
+using System.Drawing.Printing;
+using PdfiumViewer;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+namespace PrinterServerApp
+{
+    internal static class Program
+    {
+        //END PARAMETER
+        //IF TRUE STOPS PROGRAM
+        public static bool EndProgram { get; set; } = false;
+
+        //LOG PATH
+        public static string LOG_PATH = "";
+        public static string ERROR_LOG = "";
+        public static string HTTP_ERROR_LOG = "";
+        public static string PRINT_ERROR_LOG = "";
+
+        //API ENDPOINTS
+        public static string PRINT_LIST_API = "";
+        public static string RECEIPT_PDF_API = "";
+        public static string LABEL_PDF_API = "";
+        public static string SHUKA_IRAI_PDF_API = "";
+        public static string NOUHIN_PDF_API = "";
+        public static string DENPYO_PDF_API = "";
+        public static string ORDER_UPDATE_API = "";
+
+        //TEMP OUTPUT PATH
+        public static string FILE_PATH = "";
+
+        //SLEEP・DELAY TIME
+        // in miliseconds
+        public static int SLEEP_TIME;
+
+        /// <summary>
+        ///  The main entry point for the application.
+        /// </summary>
+        [STAThread]
+        static void Main()
+        {
+<<<<<<< .mine
+            //GET CONFIG JSON FILE
+            string configFilePath = "C:\\Users\\LOGI03\\Desktop\\UedaOrder\\PrinterServerApp\\config.json";
+            string configContent = File.ReadAllText(configFilePath);
+
+            //CHECK IF EMPTY
+            if (string.IsNullOrWhiteSpace(configContent)) return;
+
+            //CREATE JSON CONFIG OBJECT 
+            JObject config = JObject.Parse(configContent);
+
+            //SET VARIABLES//
+            //LOG PATHS
+            LOG_PATH = (string)config["LOG_PATH"];
+            ERROR_LOG = (string)config["ERROR_LOG"];
+            HTTP_ERROR_LOG = (string)config["HTTP_ERROR_LOG"];
+            PRINT_ERROR_LOG = (string)config["PRINT_ERROR_LOG"];
+            //API
+            PRINT_LIST_API = (string)config["PRINT_LIST_API"];
+            RECEIPT_PDF_API = (string)config["RECEIPT_PDF_API"];
+            LABEL_PDF_API = (string)config["LABEL_PDF_API"];
+            SHUKA_IRAI_PDF_API = (string)config["SHUKA_IRAI_PDF_API"];
+            NOUHIN_PDF_API = (string)config["NOUHIN_PDF_API"];
+            DENPYO_PDF_API = (string)config["DENPYO_PDF_API"];
+            ORDER_UPDATE_API = (string)config["ORDER_UPDATE_API"];
+            //TEMP FILE PATH
+            FILE_PATH = (string)config["FILE_PATH"];
+            //SLEEP・DELAY TIME
+            SLEEP_TIME = (int)config["SLEEP_TIME"];
+
+            //二重起動チェック
+            // Double start check
+            using Mutex mutex = new(true, "PrinterServer", out bool isNewInstance);
+
+            if (!isNewInstance)
+            {
+                string logMessage = string.Format("[{0}] このプログラムは既に実行されています。\r\n", DateTime.Now.ToString());
+                File.AppendAllText(LOG_PATH + ERROR_LOG, logMessage);
+                return;
+            }
+
+            //自動帳票発行
+||||||| .r14
+            //自動発行
+=======
+            //二重起動チェック
+            // Double start check
+            using Mutex mutex = new(true, "PrinterServer", out bool isNewInstance);
+
+            if (!isNewInstance)
+            {
+                string logMessage = string.Format("[{0}] このプログラムは既に実行されています。\r\n", DateTime.Now.ToString());
+                File.AppendAllText(LOG_PATH + ERROR_LOG, logMessage);
+                return;
+            }
+
+            //自動帳票発行
+>>>>>>> .r19
+            AutoPrint();
+
+            // To customize application configuration such as set high DPI settings or default font,
+            // see https://aka.ms/applicationconfiguration.
+            ApplicationConfiguration.Initialize();
+            Application.Run(new Form1());
+        }
+
+        /// <summary>
+        /// 自動帳票発行処理
+        /// </summary>
+        /// <returns></returns>
+        static async Task AutoPrint()
+        {
+            HttpClient client = new();
+
+            while (true)
+            {
+                //Argument is true then stop program
+                if (EndProgram)
+                {
+                    Environment.Exit(0);
+                }
+
+                //sleep
+                await Task.Delay(SLEEP_TIME);
+
+                List<PrintList> printList = await GetPrintList(client, PRINT_LIST_API);
+
+                //If no print list skip
+                if (printList == null || printList.Count < 1)
+                {
+                    //skip
+                    continue;
+                }
+
+                //Loop through list
+                foreach (var item in printList)
+                {
+                    try
+                    {
+                        //Argument is true then stop program
+                        if (EndProgram)
+                        {
+                            Environment.Exit(0);
+                        }
+
+                        int pCnt = 0;
+                        if (item.Denpyo_flg == "1")
+                        {
+                            //get denpyo/print
+                            if (await GetPdf(client, DENPYO_PDF_API + item.Order_no, "売上伝票", "A4"))
+                            {
+                                pCnt++;
+                            }
+                        };
+
+                        if (item.Hikae_flg == "1")
+                        {
+                            //get hikae
+                            if (await GetPdf(client, SHUKA_IRAI_PDF_API + item.Order_no, "出荷依頼書", "A4"))
+                            {
+                                pCnt++;
+                            }
+                        };
+
+                        if (item.Receipt_flg == "1")
+                        {
+                            // get reciept/print
+                            if (await GetPdf(client, RECEIPT_PDF_API + item.Order_no, "領収書", "A4"))
+                            {
+                                pCnt++;
+                            }
+                        };
+
+                        if (item.Order_flg == "1")
+                        {
+                            //get order form
+                            if (await GetPdf(client, NOUHIN_PDF_API + item.Order_no, "納品書・注文書", "A3"))
+                            {
+                                pCnt++;
+                            }
+                        };
+
+                        if (item.Label_flg == "1")
+                        {
+                            //get label
+                            if (await GetPdf(client, LABEL_PDF_API + item.Order_no, "荷札・送り状", ""))
+                            {
+                                pCnt++;
+                            }
+                        };
+
+                        //UPDATE print flg
+                        if (pCnt != 0)
+                        {
+                            UpdatePrintFlg(client, ORDER_UPDATE_API + item.Order_no, item.Order_no);
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        string logMessage = string.Format("[{0}] [受注No.{1}] 処理中にエラーが発生しました： {2}\r\n", DateTime.Now.ToString(), item.Order_no, ex.Message);
+                        File.AppendAllText(LOG_PATH + ERROR_LOG, logMessage);
+                    }
+                };
+            }
+
+        }
+
+        /// <summary>
+        /// Get list of orders to be printed
+        /// </summary>
+        /// <param name="client">The HttpClient</param>
+        /// <param name="url">The Api Endpoint</param>
+        /// <returns>Print list</returns>
+        static async Task<List<PrintList>> GetPrintList(HttpClient client, string url)
+        {
+            try
+            {
+                var response = await client.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+
+                string jsonResult = await response.Content.ReadAsStringAsync();
+
+                return JsonConvert.DeserializeObject<List<PrintList>>(jsonResult);
+            }
+            catch (Exception ex)
+            {
+                // Log any exceptions that occur during http request
+                string logMessage = string.Format("[{0}] 印刷リストの取得中にエラーが発生しました： {1}\r\n", DateTime.Now.ToString(), ex.Message);
+                File.AppendAllText(LOG_PATH + HTTP_ERROR_LOG, logMessage);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// UPDATE PRINT FLAG OF ORDER
+        /// </summary>
+        /// <param name="client">The HttpClien</param>
+        /// <param name="url">The Api Endpoint</param>
+        /// <param name="order_no">The order no, used if error</param>
+        static async void UpdatePrintFlg(HttpClient client, string url, string order_no)
+        {
+            try
+            {
+                var response = await client.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+                string jsonResult = await response.Content.ReadAsStringAsync();
+                JObject jsonObject = JsonConvert.DeserializeObject<JObject>(jsonResult);
+
+                if (jsonObject.ContainsKey("error")) throw new Exception(jsonObject["error"].ToString());
+
+            }
+            catch (Exception ex)
+            {
+                // Log any exceptions that occur during http request
+                string logMessage = string.Format("[{0}] 受注No.{1}の更新中にエラーが発生しました： {2}\r\n", DateTime.Now.ToString(), order_no, ex.Message);
+                File.AppendAllText(LOG_PATH + HTTP_ERROR_LOG, logMessage);
+            }
+        }
+
+        /// <summary>
+        /// Get PDF from server and print out
+        /// </summary>
+        /// <param name="client">The HttpClient</param>
+        /// <param name="url">The Api Endpoint</param>
+        /// <param name="report">The report name</param>
+        /// <param name="pagesize">The pagesize of the pdf, used for printing.("A4", "A3")</param>
+        /// <returns>True on success</returns>
+        static async Task<bool> GetPdf(HttpClient client, string url, string report, string pagesize)
+        {
+            try
+            {
+                DateTime now = DateTime.Now;
+                string formatDate = now.ToString("yyyyMMddHHmmssfff");
+
+                var response = await client.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+                string jsonResult = await response.Content.ReadAsStringAsync();
+                PdfFile jsonObject = JsonConvert.DeserializeObject<PdfFile>(jsonResult);
+
+                //If Error
+                if (!string.IsNullOrEmpty(jsonObject.Error))
+                {
+                    throw new Exception(jsonObject.Error);
+                }
+
+                //Check printer name
+                if (string.IsNullOrEmpty(jsonObject.Printer_nm))
+                {
+                    throw new Exception("プリンタドライバを取得出来ませんでした。");
+                }
+
+                //Check pdf bytes
+                if (jsonObject.Pdf.Length == 0 || jsonObject.Pdf == null)
+                {
+                    throw new Exception("PDFバイトを取得出来ませんでした。");
+                }
+
+                //filename
+                string file = string.Format("{0}{1}_{2}.pdf", FILE_PATH, formatDate, report);
+
+                // Create and Save the PDF file
+                try
+                {
+                    File.WriteAllBytes(file, jsonObject.Pdf);
+                }
+                catch (Exception ex)
+                {
+                    // Log any exceptions that occur during printing
+                    string logMessage = string.Format("[{0}] {1}の構築中にエラーが発生しました： {2}\r\n", DateTime.Now.ToString(), report, ex.Message);
+                    File.AppendAllText(LOG_PATH + PRINT_ERROR_LOG, logMessage);
+                    return false;
+                }
+
+                //print file
+                try
+                {
+                    PrintPdf(jsonObject.Printer_nm, file, pagesize, "");
+                }
+                catch (Exception ex)
+                {
+                    // Log any exceptions that occur during printing
+                    string logMessage = string.Format("[{0}] {1}の印刷中にエラーが発生しました： {2}\r\n", DateTime.Now.ToString(), report, ex.Message);
+                    File.AppendAllText(LOG_PATH + PRINT_ERROR_LOG, logMessage);
+                    return false;
+                }
+
+                // Delete file when complete
+                File.Delete(file);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Log any exceptions that occur during http request
+                string logMessage = string.Format("[{0}] {1}の取得中にエラーが発生しました： {2}\r\n", DateTime.Now.ToString(), report, ex.Message);
+                File.AppendAllText(LOG_PATH + HTTP_ERROR_LOG, logMessage);
+                return false;
+            }
+
+        }
+
+        /// <summary>
+        /// PRINT OUT PDF
+        /// </summary>
+        /// <param name="printer">The printer name</param>
+        /// <param name="file">The full filepath of file to be printed</param>
+        /// <param name="paperSize">The size of the paper eg, A4</param>
+        /// <param name="paperSource">The paper tray</param>
+        static void PrintPdf(string printer, string file, string paperSize, string paperSource)
+        {
+            try
+            {
+                using PdfDocument pdfdoc = PdfDocument.Load(file);
+                using PrintDocument pd = pdfdoc.CreatePrintDocument();
+
+                pd.PrinterSettings.PrinterName = printer;
+
+                // Set default paper size
+                if (!string.IsNullOrEmpty(paperSize))
+                {
+                    for (int index = 0; index < pd.PrinterSettings.PaperSizes.Count; index++)
+                    {
+                        if (pd.PrinterSettings.PaperSizes[index].PaperName.Contains(paperSize) == true)
+                        {
+                            pd.DefaultPageSettings.PaperSize = pd.PrinterSettings.PaperSizes[index];
+                            break;
+                        }
+                    }
+                }
+
+                // Set default paper source
+                if (!string.IsNullOrEmpty(paperSource))
+                {
+                    for (int index = 0; index < pd.PrinterSettings.PaperSources.Count; index++)
+                    {
+                        if (pd.PrinterSettings.PaperSources[index].SourceName.Contains(paperSource) == true)
+                        {
+                            pd.DefaultPageSettings.PaperSource = pd.PrinterSettings.PaperSources[index];
+                            break;
+                        }
+                    }
+                }
+
+                // Print the document
+                pd.Print();
+            }
+            catch (Exception ex)
+            {
+                // Log any exceptions that occur during printing
+                string logMessage = string.Format("[{0}] [{1}] 印刷中にエラーが発生しました： {2}\r\n", DateTime.Now.ToString(), file, ex.Message);
+                File.AppendAllText(LOG_PATH + PRINT_ERROR_LOG, logMessage);
+            }
+        }
+
+    }
+    public class PrintList
+    {
+        public string Order_no { get; set; }
+        public string Denpyo_flg { get; set; }
+        public string Hikae_flg { get; set; }
+        public string Receipt_flg { get; set; }
+        public string Order_flg { get; set; }
+        public string Label_flg { get; set; }
+
+    }
+
+    public class PdfFile
+    {
+        public string Printer_nm { get; set; }
+
+        public byte[] Pdf { get; set; }
+
+        public string Error { get; set; }
+    }
+}
