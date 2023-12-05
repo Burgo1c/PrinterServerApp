@@ -1,5 +1,4 @@
-
-﻿# PRINT SERVER APPLICATION
+# PRINT SERVER APPLICATION
 An automated print system.
 
 ## Author
